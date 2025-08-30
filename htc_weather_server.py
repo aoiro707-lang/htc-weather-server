@@ -1,3 +1,19 @@
+import threading, time, requests
+
+def keep_alive():
+    while True:
+        try:
+            # ping chính server của bạn
+            requests.get("https://htc-weather-server.onrender.com/")
+            print("Ping OK -> giữ server không sleep")
+        except Exception as e:
+            print("Ping lỗi:", e)
+        # Render sleep sau 15 phút -> ping mỗi 14 phút
+        time.sleep(14 * 60)
+
+# chạy keep_alive trong thread nền
+threading.Thread(target=keep_alive, daemon=True).start()
+
 from flask import Flask, request, jsonify
 import requests
 
