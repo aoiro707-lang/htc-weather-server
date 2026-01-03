@@ -76,7 +76,7 @@ from flask import Flask, request, jsonify
 app = Flask(__name__)
 
 # trạng thái relay lưu trên server
-relay_state = "ON"
+relay_state = "OFF"
 
 @app.route("/")
 def home():
