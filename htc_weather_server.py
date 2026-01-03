@@ -69,6 +69,29 @@ def get_weather():
 
 
 # ESP01s
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+relay_state = "OFF"   # 👈 BIẾN TOÀN CỤC
+
+@app.route("/relay", methods=["GET", "POST"])
+def relay():
+    global relay_state
+
+    if request.method == "POST":
+        data = request.get_json()
+        if data and "state" in data:
+            relay_state = data["state"]
+        return jsonify({"ok": True, "state": relay_state})
+
+    # GET
+    return jsonify({"state": relay_state})
+
+
+if __name__ == "__main__":
+    app.run()
+
 import threading, time, requests
 
 from flask import Flask, request, jsonify
@@ -76,7 +99,6 @@ from flask import Flask, request, jsonify
 app = Flask(__name__)
 
 # trạng thái relay lưu trên server
-relay_state = "OFF"
 @app.route("/relay", methods=["GET", "POST"])
 def relay():
     global relay_state
