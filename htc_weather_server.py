@@ -77,6 +77,19 @@ app = Flask(__name__)
 
 # trạng thái relay lưu trên server
 relay_state = "OFF"
+@app.route("/relay", methods=["GET", "POST"])
+def relay():
+    global relay_state
+
+    if request.method == "GET":
+        state = request.args.get("state")
+        if state in ["ON", "OFF"]:
+            relay_state = state
+        return {"state": relay_state}
+
+    data = request.json
+    relay_state = data["state"]
+    return {"ok": True, "state": relay_state}
 
 @app.route("/")
 def home():
