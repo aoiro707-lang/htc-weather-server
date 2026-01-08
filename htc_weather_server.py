@@ -1,3 +1,34 @@
+from flask import Flask, jsonify, request
+
+app = Flask(__name__)
+
+relay_state = "OFF"
+wifi_name = "Vinatoken_UCO"
+
+@app.route("/")
+def home():
+    return "Server OK"
+
+@app.route("/relay")
+def relay():
+    global relay_state
+    state = request.args.get("state")
+    if state in ["ON", "OFF"]:
+        relay_state = state
+    return jsonify({"state": relay_state})
+
+@app.route("/status")
+def status():
+    return jsonify({
+        "online": True,
+        "state": relay_state,
+        "wifi": wifi_name
+    })
+
+@app.route("/ping")
+def ping():
+    return "pong"
+
 #def keep_alive():
 while True:
         try:
@@ -66,3 +97,15 @@ def get_weather():
         return jsonify(result)
     else:
         return jsonify({"error": "Failed to fetch weather"}), 500
+
+from flask import Flask, jsonify, request
+
+app = Flask(__name__)
+
+relay_state = "OFF"
+wifi_name = "Vinatoken_UCO"
+
+@app.route("/")
+def home():
+    return "Server OK"
+
