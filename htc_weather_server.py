@@ -1,5 +1,5 @@
 #def keep_alive():
-    while True:
+while True:
         try:
             # ping chính server của bạn
             requests.get("https://htc-weather-server.onrender.com/")
