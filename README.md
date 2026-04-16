@@ -1,3 +1,13 @@
+# HTC HD2 Server (Weather + Stocks)
+
+Server API thay thế HTC server cũ cho:
+- Weather
+- Stocks
+
+## Deploy Render
+Start command:
+
+
 # HTC Weather Server
 
 Server Flask thay thế HTC Weather, trả dữ liệu từ OpenWeatherMap.
