@@ -1,1 +1,33 @@
+[
+  { "name": "Ben Nghe", "district": "District 1", "lat": 10.7798, "lon": 106.7052 },
+  { "name": "Ben Thanh", "district": "District 1", "lat": 10.7725, "lon": 106.6980 },
+  { "name": "Da Kao", "district": "District 1", "lat": 10.7870, "lon": 106.7000 },
+  { "name": "Nguyen Thai Binh", "district": "District 1", "lat": 10.7680, "lon": 106.7010 },
 
+  { "name": "Thao Dien", "district": "District 2", "lat": 10.8040, "lon": 106.7400 },
+  { "name": "An Phu", "district": "District 2", "lat": 10.8000, "lon": 106.7500 },
+  { "name": "Binh Trung Tay", "district": "District 2", "lat": 10.7850, "lon": 106.7600 },
+
+  { "name": "Ward 1", "district": "District 3", "lat": 10.7840, "lon": 106.6820 },
+  { "name": "Ward 6", "district": "District 3", "lat": 10.7790, "lon": 106.6840 },
+
+  { "name": "Ward 13", "district": "Binh Thanh", "lat": 10.8080, "lon": 106.7090 },
+  { "name": "Ward 25", "district": "Binh Thanh", "lat": 10.8010, "lon": 106.7140 },
+
+  { "name": "Ward 4", "district": "Phu Nhuan", "lat": 10.8000, "lon": 106.6780 },
+
+  { "name": "Ward 2", "district": "Tan Binh", "lat": 10.8030, "lon": 106.6520 },
+  { "name": "Ward 15", "district": "Tan Binh", "lat": 10.7980, "lon": 106.6490 },
+
+  { "name": "Ward 5", "district": "Go Vap", "lat": 10.8380, "lon": 106.6700 },
+  { "name": "Ward 7", "district": "Go Vap", "lat": 10.8350, "lon": 106.6750 },
+
+  { "name": "Ward 10", "district": "District 10", "lat": 10.7700, "lon": 106.6670 },
+
+  { "name": "Ward 5", "district": "District 8", "lat": 10.7240, "lon": 106.6300 },
+
+  { "name": "Ward 14", "district": "District 11", "lat": 10.7620, "lon": 106.6500 },
+
+  { "name": "Linh Trung", "district": "Thu Duc City", "lat": 10.8700, "lon": 106.8000 },
+  { "name": "Hiep Binh Chanh", "district": "Thu Duc City", "lat": 10.8400, "lon": 106.7300 }
+]
