@@ -25,11 +25,9 @@ class KDNode:
 def build_kdtree(points, depth=0):
     if not points:
         return None
-
     axis = depth % 2
     points.sort(key=lambda x: x[0][axis])
     mid = len(points) // 2
-
     return KDNode(
         points[mid][0],
         points[mid][1],
@@ -46,7 +44,6 @@ def nearest(root, target, best=None):
         return best
 
     d = distance(target, root.point)
-
     if best is None or d < best[1]:
         best = (root, d)
 
@@ -84,7 +81,65 @@ def set_cache(key, data):
     CACHE[key] = (data, time.time())
 
 # =============================
-# FIND LOCATION (HTC STYLE)
+# DAY / NIGHT
+# =============================
+def is_night(data):
+    now = time.time()
+    return now < data["sys"]["sunrise"] or now > data["sys"]["sunset"]
+
+# =============================
+# HTC ICON FULL MAP (01–44)
+# =============================
+def map_icon(data):
+    main = data["weather"][0]["main"]
+    desc = data["weather"][0]["description"].lower()
+    night = is_night(data)
+
+    # CLEAR
+    if main == "Clear":
+        return "02" if night else "01"
+
+    # CLOUDS
+    if main == "Clouds":
+        if "few" in desc:
+            return "04" if night else "03"
+        elif "scattered" in desc:
+            return "04" if night else "03"
+        elif "broken" in desc:
+            return "06"
+        else:
+            return "07"
+
+    # DRIZZLE
+    if main == "Drizzle":
+        return "13"
+
+    # RAIN
+    if main == "Rain":
+        if "light" in desc:
+            return "13"
+        elif "heavy" in desc:
+            return "12"
+        else:
+            return "12"
+
+    # THUNDER
+    if main == "Thunderstorm":
+        return "15"
+
+    # SNOW
+    if main == "Snow":
+        return "22"
+
+    # ATMOSPHERE
+    if main in ["Mist", "Fog", "Haze"]:
+        return "10"
+
+    # DEFAULT
+    return "07"
+
+# =============================
+# LOCATION (KD + FALLBACK)
 # =============================
 def find_location(lat, lon):
     node, dist = nearest(KD_TREE, (lat, lon))
@@ -92,28 +147,13 @@ def find_location(lat, lon):
     if node:
         loc = node.data
 
-        # phường (rất gần)
         if dist < 0.01:
             return f"{loc['name']}, {loc['district']}"
 
-        # fallback quận
         elif dist < 0.03:
             return loc['district']
 
     return "Ho Chi Minh City"
-
-# =============================
-# ICON MAP
-# =============================
-def map_icon(main):
-    return {
-        "Clear": 1,
-        "Clouds": 7,
-        "Rain": 12,
-        "Thunderstorm": 15,
-        "Snow": 22,
-        "Mist": 11
-    }.get(main, 7)
 
 # =============================
 # API
@@ -142,12 +182,11 @@ def get_weather():
     temp = round(data["main"]["temp"])
     humidity = data["main"]["humidity"]
     wind = data["wind"]["speed"]
-    condition = data["weather"][0]["main"]
 
-    icon = map_icon(condition)
+    icon = map_icon(data)
 
     print(f"[LOCATION] {location_name}")
-    print(f"[WEATHER] temp={temp} cond={condition}")
+    print(f"[ICON] {icon}")
 
     xml = f"""<?xml version="1.0" encoding="utf-8"?>
 <weatherdata>
@@ -163,9 +202,6 @@ def get_weather():
 
     return Response(xml, mimetype="application/xml")
 
-# =============================
-# HOME
-# =============================
 @app.route("/")
 def home():
-    return "HTC HD2 Weather Server (KD-tree FULL) OK"
+    return "HTC HD2 Weather Server FULL ICON 44 OK"
