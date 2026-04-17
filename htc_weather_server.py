@@ -107,8 +107,37 @@ def map_icon(data):
             return "04" if night else "03"
         elif "broken" in desc:
             return "06"
-        else:
+        elif "overcast" in desc:
             return "07"
+        return "07"
+
+    # DRIZZLE
+    if main == "Drizzle":
+        return "13"
+
+    # RAIN
+    if main == "Rain":
+        if "light" in desc:
+            return "13"
+        elif "moderate" in desc:
+            return "12"
+        elif "heavy" in desc:
+            return "12"
+        return "12"
+
+    # THUNDER
+    if main == "Thunderstorm":
+        return "15"
+
+    # SNOW
+    if main == "Snow":
+        return "22"
+
+    # FOG / MIST
+    if main in ["Mist", "Fog", "Haze", "Smoke"]:
+        return "10"
+
+    return "07"
 
     # DRIZZLE
     if main == "Drizzle":
@@ -187,6 +216,7 @@ def get_weather():
 
     print(f"[LOCATION] {location_name}")
     print(f"[ICON] {icon}")
+    print(data["weather"])
 
     xml = f"""<?xml version="1.0" encoding="utf-8"?>
 <weatherdata>
