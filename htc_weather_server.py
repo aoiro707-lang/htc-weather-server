@@ -3,6 +3,25 @@ import requests
 import time
 import datetime
 
+
+
+SERVER_URL = "https://htc-weather-server.onrender.com/"
+
+def auto_ping():
+    while True:
+        try:
+            response = requests.get(SERVER_URL)
+            print(f"[PING] {time.ctime()} - Status: {response.status_code}")
+        except Exception as e:
+            print(f"[ERROR] {time.ctime()} - {e}")
+        
+        # đợi 15 phút rồi ping lại ngăn server sleep
+        time.sleep(890)  # 14ph 50giây
+
+if __name__ == "__main__":
+    auto_ping()
+
+
 app = Flask(__name__)
 
 API_KEY = "0c60b2b833632e5c653f6c29dada5dfa"
