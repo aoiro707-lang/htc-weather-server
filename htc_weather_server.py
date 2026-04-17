@@ -1,5 +1,5 @@
 from flask import Flask, request, Response
-import json, math, requests
+import json, math, requests, time
 
 app = Flask(__name__)
 
@@ -8,7 +8,7 @@ API_KEY = "0c60b2b833632e5c653f6c29dada5dfa"
 # =============================
 # LOAD DATA
 # =============================
-with open("locations_hcm_wards.json", "r", encoding="utf-8") as f:
+with open("locations_hcm_full.json", "r", encoding="utf-8") as f:
     LOCATIONS = json.load(f)
 
 # =============================
@@ -67,16 +67,53 @@ POINTS = [((loc["lat"], loc["lon"]), loc) for loc in LOCATIONS]
 KD_TREE = build_kdtree(POINTS)
 
 # =============================
-# FIND LOCATION
+# CACHE
+# =============================
+CACHE = {}
+
+def get_cache(key):
+    now = time.time()
+    if key in CACHE:
+        data, ts = CACHE[key]
+        if now - ts < 600:
+            print(f"[CACHE HIT] {key}")
+            return data
+    return None
+
+def set_cache(key, data):
+    CACHE[key] = (data, time.time())
+
+# =============================
+# FIND LOCATION (HTC STYLE)
 # =============================
 def find_location(lat, lon):
     node, dist = nearest(KD_TREE, (lat, lon))
 
-    if node and dist < 0.02:
+    if node:
         loc = node.data
-        return f"{loc['name']}, {loc['district']}"
+
+        # phường (rất gần)
+        if dist < 0.01:
+            return f"{loc['name']}, {loc['district']}"
+
+        # fallback quận
+        elif dist < 0.03:
+            return loc['district']
 
     return "Ho Chi Minh City"
+
+# =============================
+# ICON MAP
+# =============================
+def map_icon(main):
+    return {
+        "Clear": 1,
+        "Clouds": 7,
+        "Rain": 12,
+        "Thunderstorm": 15,
+        "Snow": 22,
+        "Mist": 11
+    }.get(main, 7)
 
 # =============================
 # API
@@ -85,20 +122,32 @@ def find_location(lat, lon):
 def get_weather():
     lat = float(request.args.get("lat"))
     lon = float(request.args.get("lon"))
+    device = request.remote_addr
+
+    print(f"\n[REQUEST] {device} lat={lat} lon={lon}")
 
     location_name = find_location(lat, lon)
 
-    r = requests.get(
-        "https://api.openweathermap.org/data/2.5/weather",
-        params={"lat": lat, "lon": lon, "appid": API_KEY, "units": "metric"}
-    )
+    cache_key = f"{lat}_{lon}"
+    data = get_cache(cache_key)
 
-    data = r.json()
+    if not data:
+        r = requests.get(
+            "https://api.openweathermap.org/data/2.5/weather",
+            params={"lat": lat, "lon": lon, "appid": API_KEY, "units": "metric"}
+        )
+        data = r.json()
+        set_cache(cache_key, data)
 
     temp = round(data["main"]["temp"])
     humidity = data["main"]["humidity"]
     wind = data["wind"]["speed"]
     condition = data["weather"][0]["main"]
+
+    icon = map_icon(condition)
+
+    print(f"[LOCATION] {location_name}")
+    print(f"[WEATHER] temp={temp} cond={condition}")
 
     xml = f"""<?xml version="1.0" encoding="utf-8"?>
 <weatherdata>
@@ -106,15 +155,17 @@ def get_weather():
            temperature="{temp}"
            humidity="{humidity}"
            wind="{wind}"
-           condition="{condition}" />
+           icon="{icon}" />
 </weatherdata>
 """
 
-    print(f"[GPS] {lat},{lon} → {location_name}")
+    print(f"[RESPONSE SENT] → {device}")
 
     return Response(xml, mimetype="application/xml")
 
-
+# =============================
+# HOME
+# =============================
 @app.route("/")
 def home():
-    return "HCM Ward KD-Tree Server OK"
+    return "HTC HD2 Weather Server (KD-tree FULL) OK"
