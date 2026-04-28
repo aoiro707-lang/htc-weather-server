@@ -187,6 +187,42 @@ def find_location(lat, lon):
 # =============================
 # API
 # =============================
+from flask import Flask, request, Response
+
+app = Flask(__name__)
+
+@app.route("/getweather")
+def getweather():
+    lat = request.args.get("lat")
+    lon = request.args.get("lon")
+
+    # Trả về XML giả định: ánh xạ lat/lon -> locCode
+    xml = f"""<?xml version="1.0" encoding="utf-8"?>
+<weatherdata>
+    <location city="Hanoi" state="" country="Vietnam" zipcode="" 
+              latitude="{lat}" longitude="{lon}" 
+              timezone="7" locCode="VMXX0006"/>
+</weatherdata>"""
+    return Response(xml, mimetype="application/xml")
+
+@app.route("/getstaticweather")
+def getstaticweather():
+    locCode = request.args.get("locCode")
+
+    # Trả về dữ liệu thời tiết giả cho locCode
+    xml = f"""<?xml version="1.0" encoding="utf-8"?>
+<weatherdata>
+    <current temperature="32" realfeel="35" icon="2" description="Partly Cloudy"/>
+    <forecast>
+        <day number="1" high="34" low="27" icon="2" description="Cloudy"/>
+        <day number="2" high="33" low="26" icon="3" description="Rain"/>
+        <day number="3" high="35" low="27" icon="1" description="Sunny"/>
+    </forecast>
+</weatherdata>"""
+    return Response(xml, mimetype="application/xml")
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080)
 @app.route("/getstaticweather")
 def get_static_weather():
     loc = request.args.get("locCode", "UNKNOWN")
