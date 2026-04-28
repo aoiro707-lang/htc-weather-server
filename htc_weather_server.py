@@ -187,15 +187,15 @@ def find_location(lat, lon):
 # =============================
 # API
 # =============================
-@app.route("/getweather")
-def get_weather():
-    lat = float(request.args.get("lat"))
-    lon = float(request.args.get("lon"))
+@app.route("/getstaticweather")
+def get_static_weather():
+    loc = request.args.get("locCode", "UNKNOWN")
     device = request.remote_addr
 
-    print(f"\n[REQUEST] {device} lat={lat} lon={lon}")
+    print(f"\n[REQUEST WEATHER] {device} loc={loc}")
 
-    location_name = find_location(lat, lon)
+    # 👉 tạm thời fix lat/lon test (sau bạn map lại từ locCode)
+    lat, lon = 10.699347, 106.445808
 
     cache_key = f"{lat}_{lon}"
     data = get_cache(cache_key)
@@ -214,13 +214,12 @@ def get_weather():
 
     icon = map_icon(data)
 
-    print(f"[LOCATION] {location_name}")
     print(f"[ICON] {icon}")
     print(data["weather"])
 
     xml = f"""<?xml version="1.0" encoding="utf-8"?>
 <weatherdata>
-  <weather location="{location_name}"
+  <weather location="{loc}"
            temperature="{temp}"
            humidity="{humidity}"
            wind="{wind}"
@@ -230,8 +229,4 @@ def get_weather():
 
     print(f"[RESPONSE SENT] → {device}")
 
-    return Response(xml, mimetype="application/xml")
-
-@app.route("/")
-def home():
-    return "HTC HD2 Weather Server FULL ICON 44 OK"
+    return Response(xml, mimetype="text/xml")
