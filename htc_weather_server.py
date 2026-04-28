@@ -173,7 +173,13 @@ def get_weather():
     location_name = find_location(lat, lon)
 
     # 👉 chuẩn hoá locCode (KHÔNG dấu, không space)
-    loc_clean = location_name.upper().replace(" ", "").replace(",", "")
+
+    # chuẩn hoá
+    loc_clean = loc_clean.replace("DISTRICT ", "DISTRICT")
+    loc_clean = loc_clean.replace(" ", "")
+    loc_clean = loc_clean.replace(",", "")
+
+    
     loc_code = f"NAM|VN|HCM|{loc_clean}"
 
     print(f"[LOC CODE] {loc_code}")
