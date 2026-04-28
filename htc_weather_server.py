@@ -107,37 +107,8 @@ def map_icon(data):
             return "04" if night else "03"
         elif "broken" in desc:
             return "06"
-        elif "overcast" in desc:
+        else:
             return "07"
-        return "07"
-
-    # DRIZZLE
-    if main == "Drizzle":
-        return "13"
-
-    # RAIN
-    if main == "Rain":
-        if "light" in desc:
-            return "13"
-        elif "moderate" in desc:
-            return "12"
-        elif "heavy" in desc:
-            return "12"
-        return "12"
-
-    # THUNDER
-    if main == "Thunderstorm":
-        return "15"
-
-    # SNOW
-    if main == "Snow":
-        return "22"
-
-    # FOG / MIST
-    if main in ["Mist", "Fog", "Haze", "Smoke"]:
-        return "10"
-
-    return "07"
 
     # DRIZZLE
     if main == "Drizzle":
@@ -187,51 +158,15 @@ def find_location(lat, lon):
 # =============================
 # API
 # =============================
-from flask import Flask, request, Response
-
-app = Flask(__name__)
-
 @app.route("/getweather")
-def getweather():
-    lat = request.args.get("lat")
-    lon = request.args.get("lon")
-
-    # Trả về XML giả định: ánh xạ lat/lon -> locCode
-    xml = f"""<?xml version="1.0" encoding="utf-8"?>
-<weatherdata>
-    <location city="Hanoi" state="" country="Vietnam" zipcode="" 
-              latitude="{lat}" longitude="{lon}" 
-              timezone="7" locCode="VMXX0006"/>
-</weatherdata>"""
-    return Response(xml, mimetype="application/xml")
-
-@app.route("/getstaticweather")
-def getstaticweather():
-    locCode = request.args.get("locCode")
-
-    # Trả về dữ liệu thời tiết giả cho locCode
-    xml = f"""<?xml version="1.0" encoding="utf-8"?>
-<weatherdata>
-    <current temperature="32" realfeel="35" icon="2" description="Partly Cloudy"/>
-    <forecast>
-        <day number="1" high="34" low="27" icon="2" description="Cloudy"/>
-        <day number="2" high="33" low="26" icon="3" description="Rain"/>
-        <day number="3" high="35" low="27" icon="1" description="Sunny"/>
-    </forecast>
-</weatherdata>"""
-    return Response(xml, mimetype="application/xml")
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
-@app.route("/getstaticweather")
-def get_static_weather():
-    loc = request.args.get("locCode", "UNKNOWN")
+def get_weather():
+    lat = float(request.args.get("lat"))
+    lon = float(request.args.get("lon"))
     device = request.remote_addr
 
-    print(f"\n[REQUEST WEATHER] {device} loc={loc}")
+    print(f"\n[REQUEST] {device} lat={lat} lon={lon}")
 
-    # 👉 tạm thời fix lat/lon test (sau bạn map lại từ locCode)
-    lat, lon = 10.699347, 106.445808
+    location_name = find_location(lat, lon)
 
     cache_key = f"{lat}_{lon}"
     data = get_cache(cache_key)
@@ -250,12 +185,12 @@ def get_static_weather():
 
     icon = map_icon(data)
 
+    print(f"[LOCATION] {location_name}")
     print(f"[ICON] {icon}")
-    print(data["weather"])
 
     xml = f"""<?xml version="1.0" encoding="utf-8"?>
 <weatherdata>
-  <weather location="{loc}"
+  <weather location="{location_name}"
            temperature="{temp}"
            humidity="{humidity}"
            wind="{wind}"
@@ -265,4 +200,8 @@ def get_static_weather():
 
     print(f"[RESPONSE SENT] → {device}")
 
-    return Response(xml, mimetype="text/xml")
+    return Response(xml, mimetype="application/xml")
+
+@app.route("/")
+def home():
+    return "HTC HD2 Weather Server FULL ICON 44 OK"
