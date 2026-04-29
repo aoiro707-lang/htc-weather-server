@@ -178,53 +178,41 @@ def get_weather():
     return Response(loc_code, content_type="text/plain")
 @app.route("/getstaticweather")
 def get_static_weather():
+    loc = request.args.get("locCode")
     device = request.remote_addr
-    loc = request.args.get("locCode", "UNKNOWN")
 
-    print(f"\n[REQUEST WEATHER] {device} loc={loc}")
+    print(f"[REQUEST WEATHER] {device} loc={loc}")
 
-    # 👉 TẠM FIX: dùng 1 tọa độ (bạn có thể map ngược sau)
-    lat, lon = 10.699347, 106.445808
+    lat, lon = 10.7, 106.4
 
-    cache_key = f"{lat}_{lon}"
-    data = get_cache(cache_key)
+    r = requests.get(
+        "https://api.openweathermap.org/data/2.5/weather",
+        params={
+            "lat": lat,
+            "lon": lon,
+            "appid": API_KEY,
+            "units": "metric"
+        }
+    )
 
-    if not data:
-        r = requests.get(
-            "https://api.openweathermap.org/data/2.5/weather",
-            params={
-                "lat": lat,
-                "lon": lon,
-                "appid": API_KEY,
-                "units": "metric"
-            }
-        )
-        data = r.json()
-        set_cache(cache_key, data)
+    data = r.json()
 
     temp = round(data["main"]["temp"])
     humidity = data["main"]["humidity"]
     wind = data["wind"]["speed"]
 
-    icon = map_icon(data)
+    icon = "07"
 
-    print(f"[ICON] {icon}")
-    print(f"[TEMP] {temp}°C")
+    # ⚠️ XML 1 dòng (QUAN TRỌNG)
+    xml = f'<?xml version="1.0" encoding="utf-8"?><weatherdata><weather location="{loc}" temperature="{temp}" humidity="{humidity}" wind="{wind}" icon="{icon}" /></weatherdata>'
 
-    # ❗ XML CHUẨN HTC
-    xml = f"""<?xml version="1.0" encoding="utf-8"?>
-<weatherdata>
-  <weather location="{loc}"
-           temperature="{temp}"
-           humidity="{humidity}"
-           wind="{wind}"
-           icon="{icon}" />
-</weatherdata>
-"""
+    print(f"[RESPONSE SENT OK] → {device}")
 
-    print(f"[RESPONSE SENT] → {device}")
-
-    return Response(xml, content_type="text/xml")
+    return Response(
+        xml,
+        content_type="application/xml",
+        headers={"Connection": "close"}
+    )
 
 
 @app.route("/")
